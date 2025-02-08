@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Tracker</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+        th { background-color: #4CAF50; color: white; }
+        input { width: 100px; padding: 5px; }
+    </style>
+</head>
+<body>
+    <h2>Attendance Tracker</h2>
+    <label>Subject Name: <input type="text" id="subject"></label>
+    <label>Present: <input type="number" id="present"></label>
+    <label>Total: <input type="number" id="total"></label>
+    <button onclick="addAttendance()">Add/Update</button>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Subject</th>
+                <th>Present</th>
+                <th>Total</th>
+                <th>Percentage</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="attendanceTable"></tbody>
+    </table>
+    
+    <script>
+        let attendanceData = JSON.parse(localStorage.getItem("attendance")) || {};
+        
+        function addAttendance() {
+            let subject = document.getElementById("subject").value;
+            let present = parseInt(document.getElementById("present").value);
+            let total = parseInt(document.getElementById("total").value);
+            
+            if (!subject || isNaN(present) || isNaN(total) || total < present) {
+                alert("Please enter valid data.");
+                return;
+            }
+            
+            attendanceData[subject] = { present, total };
+            localStorage.setItem("attendance", JSON.stringify(attendanceData));
+            displayAttendance();
+        }
+        
+        function displayAttendance() {
+            let tableBody = document.getElementById("attendanceTable");
+            tableBody.innerHTML = "";
+            
+            for (let subject in attendanceData) {
+                let { present, total } = attendanceData[subject];
+                let percentage = ((present / total) * 100).toFixed(2) + "%";
+                
+                tableBody.innerHTML += `
+                    <tr>
+                        <td>${subject}</td>
+                        <td>${present}</td>
+                        <td>${total}</td>
+                        <td>${percentage}</td>
+                        <td><button onclick="removeAttendance('${subject}')">Delete</button></td>
+                    </tr>`;
+            }
+        }
+        
+        function removeAttendance(subject) {
+            delete attendanceData[subject];
+            localStorage.setItem("attendance", JSON.stringify(attendanceData));
+            displayAttendance();
+        }
+        
+        displayAttendance();
+    </script>
+</body>
+</html>
